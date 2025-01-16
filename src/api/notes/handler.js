@@ -10,13 +10,13 @@ class NotesHandler {
     this.deleteNoteByIdHandler = this.deleteNoteByIdHandler.bind(this);
   }
 
-  postNoteHandler(request, h) {
+  async postNoteHandler(request, h) {
     const { title = 'untitled', body, tags } = request.payload;
 
     // Sebelum melakukan penambahan note, validasi payload yang diterima
     this._validator.validateNotePayload(request.payload);
 
-    const noteId = this._service.addNote({
+    const noteId = await this._service.addNote({
       title,
       body,
       tags,
@@ -31,8 +31,8 @@ class NotesHandler {
     }).code(201);
   }
 
-  getNotesHandler() {
-    const notes = this._service.getNotes();
+  async getNotesHandler() {
+    const notes = await this._service.getNotes();
 
     return {
       status: 'success',
@@ -42,10 +42,10 @@ class NotesHandler {
     };
   }
 
-  getNoteByIdHandler(request, h) {
+  async getNoteByIdHandler(request, h) {
     const { id } = request.params;
 
-    const note = this._service.getNoteById(id);
+    const note = await this._service.getNoteById(id);
 
     return h.response({
       status: 'success',
@@ -55,14 +55,14 @@ class NotesHandler {
     });
   }
 
-  putNoteByIdHandler(request, h) {
+  async putNoteByIdHandler(request, h) {
     const { id } = request.params;
     const noteData = request.payload;
 
     // Sebelum melakukan edit, validasi payload yang diterima
     this._validator.validateNotePayload(noteData);
 
-    this._service.editNoteById(id, noteData);
+    await this._service.editNoteById(id, noteData);
 
     return h.response({
       status: 'success',
@@ -70,10 +70,10 @@ class NotesHandler {
     });
   }
 
-  deleteNoteByIdHandler(request, h) {
+  async deleteNoteByIdHandler(request, h) {
     const { id } = request.params;
 
-    this._service.deleteNoteById(id);
+    await this._service.deleteNoteById(id);
 
     return h.response({
       status: 'success',
