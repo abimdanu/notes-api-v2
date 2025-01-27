@@ -1,19 +1,28 @@
 require('dotenv').config();
 const Hapi = require('@hapi/hapi');
 
+// Import for notes feature
 const notes = require('./api/notes');
 const NotesService = require('./services/postgres/NotesService');
 const NotesValidator = require('./validator/notes');
 
+// Import for users feature
 const users = require('./api/users');
 const UsersService = require('./services/postgres/UsersService');
 const UsersValidator = require('./validator/users');
+
+// Import for authentications feature
+const authentications = require('./api/authentications');
+const AuthenticationsService = require('./services/postgres/AuthenticationsService');
+const AuthenticationsValidator = require('./validator/authentications');
+const TokenManager = require('./tokenize/TokenManager');
 
 const ClientError = require('./exceptions/ClientError');
 
 const init = async () => {
   const notesService = new NotesService();
   const usersService = new UsersService();
+  const authenticationsService = new AuthenticationsService();
 
   const server = Hapi.server({
     port: process.env.PORT,
@@ -40,6 +49,15 @@ const init = async () => {
         validator: UsersValidator,
       },
     },
+    {
+      plugin: authentications,
+      options: {
+        authenticationsService,
+        usersService,
+        tokenManager: TokenManager,
+        validator: AuthenticationsValidator,
+      },
+    },
   ]);
 
   // Extension function untuk mengolah response jika terjadi ClientError
@@ -49,6 +67,8 @@ const init = async () => {
 
     // Penanganan client error secara internal
     if (response instanceof ClientError) {
+      console.log(response);
+
       const newResponse = h.response({
         status: 'fail',
         message: response.message,
