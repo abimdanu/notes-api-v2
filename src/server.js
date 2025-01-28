@@ -1,5 +1,8 @@
+// Import env variables
 require('dotenv').config();
+
 const Hapi = require('@hapi/hapi');
+const Jwt = require('@hapi/jwt');
 
 // Import for notes feature
 const notes = require('./api/notes');
@@ -32,6 +35,30 @@ const init = async () => {
         origin: ['*'],
       },
     },
+  });
+
+  // Register external plugins
+  await server.register([
+    {
+      plugin: Jwt,
+    },
+  ]);
+
+  // Define JWT auth strategy
+  server.auth.strategy('notesapp_jwt', 'jwt', {
+    keys: process.env.ACCESS_TOKEN_KEY,
+    verify: {
+      aud: false,
+      iss: false,
+      sub: false,
+      maxAgeSec: process.env.ACCESS_TOKEN_AGE,
+    },
+    validate: (artifacts) => ({
+      isValid: true,
+      credentials: {
+        id: artifacts.decoded.payload.id,
+      },
+    }),
   });
 
   await server.register([
