@@ -42,7 +42,7 @@ class NotesService {
     const queryResult = await this._pool.query(query);
 
     if (!queryResult.rows.length) {
-      throw new InvariantError('Catatan tidak ditemukan');
+      throw new NotFoundError('Catatan tidak ditemukan');
     }
 
     return queryResult.rows.map(mapDBToModel)[0];
