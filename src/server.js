@@ -34,7 +34,7 @@ const ExportsValidator = require('./validator/exports');
 
 // Import for uploads feature
 const uploads = require('./api/uploads');
-const StorageService = require('./services/storage/StorageService');
+const StorageService = require('./services/S3/StorageService');
 const UploadsValidator = require('./validator/uploads');
 
 const ClientError = require('./exceptions/ClientError');
@@ -43,7 +43,7 @@ const init = async () => {
   const authenticationsService = new AuthenticationsService();
   const collaborationsService = new CollaborationsService();
   const notesService = new NotesService(collaborationsService);
-  const storageService = new StorageService(path.resolve(__dirname, 'api/uploads/file/images'));
+  const storageService = new StorageService();
   const usersService = new UsersService();
 
   const server = Hapi.server({
@@ -135,6 +135,7 @@ const init = async () => {
   server.ext('onPreResponse', (request, h) => {
     // Mendapatkan konteks response dari request
     const { response } = request;
+    console.log(`got response: ${response}`);
 
     // Penanganan client error secara internal
     if (response instanceof ClientError) {
